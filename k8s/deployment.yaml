@@ -1,0 +1,41 @@
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "hello-world"
+  namespace: "jenkins"
+  labels:
+    app: "hello-world"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "hello-world"
+  template:
+    metadata:
+      labels:
+        app: "hello-world"
+    spec:
+      containers:
+      - name: "hello-world-sha256-1"
+        image: "gcr.io/gcp-terraform-315220/hello-world@sha256:42a70b4ffe040352bb29d5125a03b1df597354adf3750897630cd6a60d6a259a"
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "hello-world-hpa-yuyk"
+  namespace: "jenkins"
+  labels:
+    app: "hello-world"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "hello-world"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: "Resource"
+    resource:
+      name: "cpu"
+      targetAverageUtilization: 80
